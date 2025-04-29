@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FiSend } from 'react-icons/fi';
 
 const InputContainer = styled.div`
   display: flex;
@@ -33,6 +32,8 @@ const SendButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 48px;
+  height: 48px;
   
   &:hover {
     background-color: #3a6ae8;
@@ -41,6 +42,21 @@ const SendButton = styled.button`
   &:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+  }
+`;
+
+// 添加加载动画样式
+const Spinner = styled.div`
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid white;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 `;
 
@@ -65,7 +81,7 @@ const ChatInput = ({ onSendMessage, isLoading }) => {
         disabled={isLoading}
       />
       <SendButton type="submit" disabled={!message.trim() || isLoading}>
-        <FiSend size={20} />
+        {isLoading ? <Spinner /> : '→'}
       </SendButton>
     </InputContainer>
   );

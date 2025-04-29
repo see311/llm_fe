@@ -104,7 +104,7 @@ const Chat = () => {
   return (
     <ChatContainer>
       <Header>AI Chat Assistant</Header>
-      <ChatHistory messages={messages} />
+      <ChatHistory messages={messages} isLoading={isLoading} />
       <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
     </ChatContainer>
   );
