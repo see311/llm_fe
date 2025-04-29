@@ -24,14 +24,12 @@ export const sendMessage = async (message, sessionId, onChunkReceived) => {
       params: { message, sessionId },
       responseType: 'text',
       onDownloadProgress: (progressEvent) => {
-        // 处理流式数据
-        const chunk = progressEvent.currentTarget.response;
-        if (chunk && progressEvent.loaded > progressEvent.total) {
-          // 只处理新增的数据
-          const newData = chunk.substring(progressEvent.loaded - progressEvent.total);
-          onChunkReceived(newData);
-        } else if (chunk) {
-          onChunkReceived(chunk);
+        // 安全地访问响应数据
+        const responseText = progressEvent.target?.response || progressEvent.currentTarget?.response || '';
+        
+        if (responseText) {
+          // 简单地将整个响应传递给回调
+          onChunkReceived(responseText);
         }
       }
     });
