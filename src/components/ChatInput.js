@@ -59,7 +59,7 @@ const ChatInput = ({ onSendMessage, isLoading }) => {
     <InputContainer as="form" onSubmit={handleSubmit}>
       <StyledInput
         type="text"
-        placeholder="输入消息..."
+        placeholder="Enter message..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         disabled={isLoading}

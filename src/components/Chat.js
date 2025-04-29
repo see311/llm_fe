@@ -27,12 +27,13 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentResponse, setCurrentResponse] = useState('');
+  const [sessionId, setSessionId] = useState('default-session'); // 添加sessionId状态
 
   // 加载聊天历史
   useEffect(() => {
     const loadChatHistory = async () => {
       try {
-        const history = await getChatHistory();
+        const history = await getChatHistory(sessionId); // 传递sessionId
         if (history && history.length > 0) {
           setMessages(history);
         }
@@ -42,7 +43,7 @@ const Chat = () => {
     };
 
     loadChatHistory();
-  }, []);
+  }, [sessionId]); // 添加依赖
 
   const handleSendMessage = async (message) => {
     // 添加用户消息到聊天历史
@@ -58,7 +59,7 @@ const Chat = () => {
     
     try {
       // 处理流式响应
-      await sendMessage(message, (chunk) => {
+      await sendMessage(message, sessionId, (chunk) => { // 正确传递sessionId和回调函数
         // 更新当前响应
         setCurrentResponse(prev => prev + chunk);
         

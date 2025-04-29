@@ -16,7 +16,7 @@ export const sendMessage = async (message, sessionId, onChunkReceived) => {
   try {
     // 使用 axios 发送请求并接收流式响应
     const response = await apiClient.post('/chat', { message, sessionId }, {
-      responseType: 'stream',
+      responseType: 'text', // 改为text而不是stream
       onDownloadProgress: (progressEvent) => {
         // 处理流式数据
         const chunk = progressEvent.currentTarget.response;
