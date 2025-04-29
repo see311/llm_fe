@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
-import { sendMessage, getChatHistory } from '../services/api';
+import { sendMessage, getChatHistory, generateSessionId } from '../services/api';
+import ReactMarkdown from 'react-markdown';
 
 const ChatContainer = styled.div`
   display: flex;
@@ -27,13 +28,28 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentResponse, setCurrentResponse] = useState('');
-  const [sessionId, setSessionId] = useState('default-session'); // 添加sessionId状态
+  const [sessionId, setSessionId] = useState('');
+
+  // 初始化会话ID
+  useEffect(() => {
+    // 从localStorage获取现有的sessionId，如果没有则生成一个新的
+    const existingSessionId = localStorage.getItem('chatSessionId');
+    if (existingSessionId) {
+      setSessionId(existingSessionId);
+    } else {
+      const newSessionId = generateSessionId();
+      setSessionId(newSessionId);
+      localStorage.setItem('chatSessionId', newSessionId);
+    }
+  }, []);
 
   // 加载聊天历史
   useEffect(() => {
+    if (!sessionId) return;
+    
     const loadChatHistory = async () => {
       try {
-        const history = await getChatHistory(sessionId); // 传递sessionId
+        const history = await getChatHistory(sessionId);
         if (history && history.length > 0) {
           setMessages(history);
         }
@@ -43,9 +59,11 @@ const Chat = () => {
     };
 
     loadChatHistory();
-  }, [sessionId]); // 添加依赖
+  }, [sessionId]);
 
   const handleSendMessage = async (message) => {
+    if (!sessionId) return;
+    
     // 添加用户消息到聊天历史
     const userMessage = { role: 'user', content: message };
     setMessages(prev => [...prev, userMessage]);
@@ -59,7 +77,7 @@ const Chat = () => {
     
     try {
       // 处理流式响应
-      await sendMessage(message, sessionId, (chunk) => { // 正确传递sessionId和回调函数
+      await sendMessage(message, sessionId, (chunk) => {
         // 更新当前响应
         setCurrentResponse(prev => prev + chunk);
         

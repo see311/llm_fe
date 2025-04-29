@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import ReactMarkdown from 'react-markdown';
 
 const MessageContainer = styled.div`
   display: flex;
@@ -25,6 +26,46 @@ const MessageContent = styled.div`
   border-radius: 8px;
   max-width: 80%;
   white-space: pre-wrap;
+  
+  /* Markdown样式 */
+  & pre {
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+  
+  & code {
+    background-color: #f1f1f1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+  
+  & blockquote {
+    border-left: 4px solid #ddd;
+    padding-left: 10px;
+    margin-left: 0;
+    color: #666;
+  }
+  
+  & img {
+    max-width: 100%;
+  }
+  
+  & table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  & th, & td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  & th {
+    background-color: #f2f2f2;
+  }
 `;
 
 const ChatMessage = ({ message, isUser }) => {
@@ -34,7 +75,13 @@ const ChatMessage = ({ message, isUser }) => {
         {isUser ? 'User' : 'AI'}
       </Avatar>
       <MessageContent isUser={isUser}>
-        {message}
+        {isUser ? (
+          message
+        ) : (
+          <ReactMarkdown>
+            {message}
+          </ReactMarkdown>
+        )}
       </MessageContent>
     </MessageContainer>
   );
