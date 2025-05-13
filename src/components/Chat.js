@@ -44,47 +44,46 @@ const Chat = () => {
   }, []);
 
   // 加载聊天历史
-  useEffect(() => {
-    if (!sessionId) return;
-    
-    const loadChatHistory = async () => {
-      try {
-        const history = await getChatHistory(sessionId);
-        if (history && history.length > 0) {
-          setMessages(history);
-        }
-      } catch (error) {
-        console.error('Failed to load chat history:', error);
-      }
-    };
+  // useEffect(() => {
+  //   if (!sessionId) return;
 
-    loadChatHistory();
-  }, [sessionId]);
+  //   const loadChatHistory = async () => {
+  //     try {
+  //       const history = await getChatHistory(sessionId);
+  //       if (history && history.length > 0) {
+  //         setMessages(history);
+  //       }
+  //     } catch (error) {
+  //       console.error('Failed to load chat history:', error);
+  //     }
+  //   };
+
+  //   loadChatHistory();
+  // }, [sessionId]);
 
   const handleSendMessage = async (message) => {
     if (!sessionId) return;
-    
+
     // 添加用户消息到聊天历史
     const userMessage = { role: 'user', content: message };
     setMessages(prev => [...prev, userMessage]);
-    
+
     // 创建一个空的 AI 响应消息
     setCurrentResponse('');
     const aiMessage = { role: 'assistant', content: '' };
     setMessages(prev => [...prev, aiMessage]);
-    
+
     setIsLoading(true);
-    
+
     try {
       // 处理流式响应
       await sendMessage(message, sessionId, (chunk) => {
-        // 更新当前响应
-        setCurrentResponse(prev => prev + chunk);
-        
+        console.log('chunk', chunk);
         // 更新消息列表中的 AI 响应
         setMessages(prev => {
           const newMessages = [...prev];
-          newMessages[newMessages.length - 1].content += chunk;
+          newMessages[newMessages.length - 1].content += chunk.replace(/data:/g, '').replace(/\n\n/g, '');
+          console.log('newMessages', newMessages);
           return newMessages;
         });
       });
@@ -104,7 +103,7 @@ const Chat = () => {
   return (
     <ChatContainer>
       <Header>AI Chat Assistant</Header>
-      <ChatHistory messages={messages} isLoading={isLoading} />
+      <ChatHistory messages={messages} />
       <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
     </ChatContainer>
   );
