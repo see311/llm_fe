@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 后端 API 的基础 URL，根据您的实际情况修改
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8081';
 
 // 创建 axios 实例
 const apiClient = axios.create({
@@ -18,26 +18,37 @@ export const generateSessionId = () => {
 
 // 发送消息并接收流式响应 (使用GET请求)
 export const sendMessage = async (message, sessionId, onChunkReceived) => {
+  let receivedLength = 0;
+  const controller = new AbortController(); // 创建中断控制器
+
   try {
-    // 使用 axios 发送GET请求并接收流式响应
-    const response = await apiClient.get('/chat', {
-      params: { message, sessionId },
+    const response = await apiClient.post('/langchain/api/v1/chat/ollama/stream/v2', { message, sessionId }, {
       responseType: 'text',
+      signal: controller.signal, // 绑定中断信号
       onDownloadProgress: (progressEvent) => {
-        // 安全地访问响应数据
-        const responseText = progressEvent.target?.response || progressEvent.currentTarget?.response || '';
-        
-        if (responseText) {
-          // 简单地将整个响应传递给回调
-          onChunkReceived(responseText);
+        const chunk = progressEvent.event.target.responseText;
+
+        if (chunk.length > receivedLength) {
+          const newData = chunk.slice(receivedLength);
+          receivedLength = chunk.length;
+          // 检查是否包含终止标记
+          if (newData.includes('DONE')) {
+            controller.abort(); // 主动中断请求
+            onChunkReceived(newData.replace('[DONE]', '')); // 发送剩余数据（可选）
+            return;
+          }
+          onChunkReceived(newData);
         }
       }
     });
-    
     return response.data;
   } catch (error) {
-    console.error('Error sending message:', error);
-    throw error;
+    if (error.name === 'CanceledError') {
+      console.log('请求已主动终止（接收到DONE）');
+    } else {
+      console.error('Error sending message:', error);
+      throw error;
+    }
   }
 };
 
