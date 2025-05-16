@@ -153,7 +153,7 @@ const ChatInput = ({ onSendMessage, isLoading, onStopGeneration }) => {
       </InputContainer>
       <ExamplesContainer>
         <ExampleButton onClick={() => handleExampleClick('Hello')}>Hello</ExampleButton>
-        <ExampleButton onClick={() => handleExampleClick('Am I cool?')}>Am I cool?</ExampleButton>
+        <ExampleButton onClick={() => handleExampleClick('Who are you?')}>Who are you?</ExampleButton>
       </ExamplesContainer>
     </>
   );
