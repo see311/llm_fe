@@ -17,7 +17,7 @@ export const generateSessionId = () => {
 };
 
 // 发送消息并接收流式响应
-export const sendMessage = async (message, sessionId, onChunkReceived) => {
+export const sendMessage = async (message, sessionId, onChunkReceived, abortSignal) => {
   try {
     const response = await fetch(`${API_BASE_URL}/langchain/api/v1/chat/ollama/stream/v2`, {
       method: 'POST',
@@ -25,6 +25,7 @@ export const sendMessage = async (message, sessionId, onChunkReceived) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ message, sessionId }),
+      signal: abortSignal, // 添加中断信号
     });
 
     if (!response.ok) {
@@ -60,8 +61,12 @@ export const sendMessage = async (message, sessionId, onChunkReceived) => {
       }
     }
   } catch (error) {
-    console.error('Error sending message:', error);
-    throw error;
+    if (error.name === 'AbortError') {
+      console.log('请求已被用户取消');
+    } else {
+      console.error('Error sending message:', error);
+      throw error;
+    }
   }
 };
 

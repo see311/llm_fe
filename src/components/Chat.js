@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import ChatHistory from './ChatHistory'; // 确保路径正确
 import ChatInput from './ChatInput';
@@ -46,8 +46,8 @@ const HeaderTitle = styled.span`
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  // const [currentResponse, setCurrentResponse] = useState(''); // currentResponse 似乎未被使用，可以考虑移除
   const [sessionId, setSessionId] = useState('');
+  const abortControllerRef = useRef(null); // 添加 AbortController 引用
 
   // 初始化会话ID
   useEffect(() => {
@@ -81,63 +81,79 @@ const Chat = () => {
   // }, [sessionId]);
 
   const handleSendMessage = async (message) => {
-    if (!sessionId || !message.trim()) return; // 增加对 message 空值的判断
+    if (!sessionId || !message.trim()) return;
 
     // 添加用户消息到聊天历史
     const userMessage = { role: 'user', content: message };
     setMessages(prev => [...prev, userMessage]);
 
     // 创建一个空的 AI 响应消息
-    // setCurrentResponse(''); // currentResponse 似乎未被使用
-    const aiMessagePlaceholder = { role: 'assistant', content: '' }; // 使用更明确的变量名
+    const aiMessagePlaceholder = { role: 'assistant', content: '' };
     setMessages(prev => [...prev, aiMessagePlaceholder]);
 
     setIsLoading(true);
+    
+    // 创建新的 AbortController
+    abortControllerRef.current = new AbortController();
 
     try {
       // 处理流式响应
-      let accumulatedResponse = ""; // 用于累积流式响应片段
-      await sendMessage(message, sessionId, (chunk) => {
-        // 清理 chunk 数据
-        console.log('chunk', chunk);
-        const cleanedChunk = chunk.replace(/data:/g, '').replace(/\n\n/g, '');
-        if (cleanedChunk === '[DONE]') { // 检查流结束标记
-          return;
-        }
-        if (cleanedChunk) {
-          try {
-            // 尝试解析JSON，如果后端发送的是JSON对象片段
-            // const parsedChunk = JSON.parse(cleanedChunk);
-            // accumulatedResponse += parsedChunk.text || ''; // 假设有用 .text 字段
-            // 如果后端直接发送文本片段：
-            accumulatedResponse += cleanedChunk;
-          } catch (e) {
-            // 如果不是JSON，或者解析失败，直接累加文本
-            accumulatedResponse += cleanedChunk;
+      let accumulatedResponse = "";
+      await sendMessage(
+        message, 
+        sessionId, 
+        (chunk) => {
+          // 处理接收到的数据
+          if (chunk) {
+            try {
+              // 尝试解析JSON，如果后端发送的是JSON对象
+              const parsedChunk = JSON.parse(chunk);
+              accumulatedResponse += parsedChunk.text || parsedChunk.content || '';
+            } catch (e) {
+              // 如果不是JSON，直接累加文本
+              accumulatedResponse += chunk;
+            }
+            
+            // 更新消息显示
+            setMessages(prev => {
+              const newMessages = [...prev];
+              if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
+                newMessages[newMessages.length - 1].content = accumulatedResponse;
+              }
+              return newMessages;
+            });
           }
-        }
-        
-        setMessages(prev => {
-          const newMessages = [...prev];
-          // 确保最后一个消息是助手的占位符或部分响应
-          if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
-            newMessages[newMessages.length - 1].content = accumulatedResponse;
-          }
-          return newMessages;
-        });
-      });
+        },
+        abortControllerRef.current.signal // 传递中断信号
+      );
     } catch (error) {
       console.error('Error in chat:', error);
       // 在消息中显示错误
       setMessages(prev => {
         const newMessages = [...prev];
         if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
-          newMessages[newMessages.length - 1].content = 'Sorry, an error occurred while processing your request. Please try again later.'; // 修改错误信息为英文
+          newMessages[newMessages.length - 1].content = 'Sorry, an error occurred while processing your request. Please try again later.';
         }
         return newMessages;
       });
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null; // 清除引用
+    }
+  };
+
+  // 添加停止生成的处理函数
+  const handleStopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setIsLoading(false);
+      // 移除最后一条AI的空白消息
+      setMessages(prev => {
+        if (prev.length > 0 && prev[prev.length - 1].role === 'assistant' && prev[prev.length - 1].content === '') {
+          return prev.slice(0, -1);
+        }
+        return prev;
+      });
     }
   };
 
@@ -149,11 +165,14 @@ const Chat = () => {
   return (
     <ChatContainer>
       <Header>
-        {/* 将Chatbot替换为Standard Chatered */}
         <HeaderTitle>Standard Chatered</HeaderTitle>
       </Header>
       <ChatHistory messages={messages} onRetry={handleRetryMessage} />
-      <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+      <ChatInput 
+        onSendMessage={handleSendMessage} 
+        isLoading={isLoading} 
+        onStopGeneration={handleStopGeneration} // 添加停止生成的回调
+      />
     </ChatContainer>
   );
 };

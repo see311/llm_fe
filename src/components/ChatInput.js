@@ -96,7 +96,26 @@ const ExampleButton = styled.button`
   }
 `;
 
-const ChatInput = ({ onSendMessage, isLoading }) => {
+// 添加方块样式组件
+const StopSquare = styled.div`
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  position: absolute;
+`;
+
+// 修改 StopButton 样式
+const StopButton = styled(SendButton)`
+  background-color: #4353ff; /* 与Submit按钮颜色一致 */
+  position: relative;
+  
+  &:hover {
+    background-color: #3a49e0; /* 与Submit按钮悬停颜色一致 */
+  }
+`;
+
+// 修改 ChatInput 组件
+const ChatInput = ({ onSendMessage, isLoading, onStopGeneration }) => {
   const [message, setMessage] = useState('');
 
   const handleSubmit = (e) => {
@@ -109,10 +128,6 @@ const ChatInput = ({ onSendMessage, isLoading }) => {
 
   const handleExampleClick = (exampleText) => {
     setMessage(exampleText); // 将示例问题填充到输入框
-    // 或者直接发送示例问题
-    // if (exampleText.trim() && !isLoading) {
-    //   onSendMessage(exampleText);
-    // }
   };
 
   return (
@@ -120,20 +135,25 @@ const ChatInput = ({ onSendMessage, isLoading }) => {
       <InputContainer as="form" onSubmit={handleSubmit}>
         <StyledInput
           type="text"
-          placeholder="Ask me a fmrp related question" // 修改输入框提示文字
+          placeholder="Ask me a fmrp related question"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           disabled={isLoading}
         />
-        <SendButton type="submit" disabled={!message.trim() || isLoading}>
-          {isLoading ? <Spinner /> : 'Submit'}
-        </SendButton>
+        {isLoading ? (
+          <StopButton type="button" onClick={onStopGeneration}>
+            <Spinner />
+            <StopSquare />
+          </StopButton>
+        ) : (
+          <SendButton type="submit" disabled={!message.trim()}>
+            Submit
+          </SendButton>
+        )}
       </InputContainer>
       <ExamplesContainer>
         <ExampleButton onClick={() => handleExampleClick('Hello')}>Hello</ExampleButton>
         <ExampleButton onClick={() => handleExampleClick('Am I cool?')}>Am I cool?</ExampleButton>
-        {/* 你可以根据需要添加更多示例问题 */}
-        {/* <ExampleButton onClick={() => handleExampleClick('Are tomatoes vegetables?')}>Are tomatoes vegetables?</ExampleButton> */}
       </ExamplesContainer>
     </>
   );
