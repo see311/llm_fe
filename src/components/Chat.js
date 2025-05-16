@@ -103,15 +103,22 @@ const Chat = () => {
         message, 
         sessionId, 
         (chunk) => {
-          // 处理接收到的数据
-          if (chunk) {
+          // 清理 chunk 数据
+        console.log('chunk', chunk);
+        const cleanedChunk = chunk.replace(/data:/g, '').replace(/\n\n/g, '');
+        if (cleanedChunk === '[DONE]') { // 检查流结束标记
+          return;
+        }
+          if (cleanedChunk) {
             try {
               // 尝试解析JSON，如果后端发送的是JSON对象
-              const parsedChunk = JSON.parse(chunk);
-              accumulatedResponse += parsedChunk.text || parsedChunk.content || '';
+              //const parsedChunk = JSON.parse(chunk);
+              //accumulatedResponse += parsedChunk.text || parsedChunk.content || '';
+	      // 如果后端直接发送文本片段：
+              accumulatedResponse += cleanedChunk;
             } catch (e) {
               // 如果不是JSON，直接累加文本
-              accumulatedResponse += chunk;
+              accumulatedResponse += cleanedChunk;
             }
             
             // 更新消息显示
