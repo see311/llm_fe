@@ -99,7 +99,8 @@ const Chat = () => {
       let accumulatedResponse = ""; // 用于累积流式响应片段
       await sendMessage(message, sessionId, (chunk) => {
         // 清理 chunk 数据
-        const cleanedChunk = chunk.replace(/^data:\s*/, '').trim();
+        console.log('chunk', chunk);
+        const cleanedChunk = chunk.replace(/data:/g, '').replace(/\n\n/g, '');
         if (cleanedChunk === '[DONE]') { // 检查流结束标记
           return;
         }
