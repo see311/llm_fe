@@ -16,39 +16,52 @@ export const generateSessionId = () => {
   return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 };
 
-// 发送消息并接收流式响应 (使用GET请求)
+// 发送消息并接收流式响应
 export const sendMessage = async (message, sessionId, onChunkReceived) => {
-  let receivedLength = 0;
-  const controller = new AbortController(); // 创建中断控制器
-
   try {
-    const response = await apiClient.post('/langchain/api/v1/chat/ollama/stream/v2', { message, sessionId }, {
-      responseType: 'text',
-      signal: controller.signal, // 绑定中断信号
-      onDownloadProgress: (progressEvent) => {
-        const chunk = progressEvent.event.target.responseText;
+    const response = await fetch(`${API_BASE_URL}/langchain/api/v1/chat/ollama/stream/v2`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message, sessionId }),
+    });
 
-        if (chunk.length > receivedLength) {
-          const newData = chunk.slice(receivedLength);
-          receivedLength = chunk.length;
-          // 检查是否包含终止标记
-          if (newData.includes('DONE')) {
-            controller.abort(); // 主动中断请求
-            onChunkReceived(newData.replace('[DONE]', '')); // 发送剩余数据（可选）
-            return;
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    if (!response.body) {
+      throw new Error("ReadableStream not supported in this browser.");
+    }
+
+    // 获取reader来读取流
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    
+    // 读取数据流
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      // 解码二进制数据为文本
+      const chunk = decoder.decode(value, { stream: true });
+      
+      // 处理SSE格式的数据
+      const lines = chunk.split('\n');
+      for (const line of lines) {
+        if (line.startsWith('data:')) {
+          const data = line.substring(5).trim();
+          if (data === '[DONE]') {
+            return; // 流结束
           }
-          onChunkReceived(newData);
+          onChunkReceived(data);
         }
       }
-    });
-    return response.data;
-  } catch (error) {
-    if (error.name === 'CanceledError') {
-      console.log('请求已主动终止（接收到DONE）');
-    } else {
-      console.error('Error sending message:', error);
-      throw error;
     }
+  } catch (error) {
+    console.error('Error sending message:', error);
+    throw error;
   }
 };
 
