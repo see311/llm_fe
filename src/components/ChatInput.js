@@ -135,7 +135,7 @@ const ChatInput = ({ onSendMessage, isLoading, onStopGeneration }) => {
       <InputContainer as="form" onSubmit={handleSubmit}>
         <StyledInput
           type="text"
-          placeholder="Ask me a fmrp related question"
+          placeholder="Ask me your question"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           disabled={isLoading}
