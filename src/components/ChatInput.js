@@ -141,19 +141,23 @@ const ChatInput = ({ onSendMessage, isLoading, onStopGeneration }) => {
           disabled={isLoading}
         />
         {isLoading ? (
-          <StopButton type="button" onClick={onStopGeneration}>
+          <StopButton type="button" /*onClick={onStopGeneration}*/>
             <Spinner />
-            <StopSquare />
+            {/* <StopSquare /> */}
           </StopButton>
         ) : (
           <SendButton type="submit" disabled={!message.trim()}>
             Submit
           </SendButton>
         )}
+        {/* <SendButton type="submit" disabled={!message.trim() || isLoading}>
+            Submit
+        </SendButton> */}
       </InputContainer>
       <ExamplesContainer>
         <ExampleButton onClick={() => handleExampleClick('Hello')}>Hello</ExampleButton>
         <ExampleButton onClick={() => handleExampleClick('Who are you?')}>Who are you?</ExampleButton>
+        <ExampleButton onClick={() => handleExampleClick('What is SSDR?')}>What is SSDR?</ExampleButton>
       </ExamplesContainer>
     </>
   );
