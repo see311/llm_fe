@@ -172,7 +172,7 @@ const Chat = () => {
   return (
     <ChatContainer>
       <Header>
-        <HeaderTitle>Standard Chatered</HeaderTitle>
+        <HeaderTitle>Standard Chartered</HeaderTitle>
       </Header>
       <ChatHistory messages={messages} onRetry={handleRetryMessage} />
       <ChatInput 
