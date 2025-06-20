@@ -1,23 +1,20 @@
 import React from 'react';
 import styled from 'styled-components';
 import ReactMarkdown from 'react-markdown';
+import aiAvatar from '../assets/ai-avatar.png';
+import userAvatar from '../assets/user-avatar.png';
 
 const MessageContainer = styled.div`
   display: flex;
   margin-bottom: 16px;
+  justify-content: ${props => props.isUser ? 'flex-end' : 'flex-start'};
 `;
 
-const Avatar = styled.div`
+const Avatar = styled.img`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: ${props => props.isUser ? '#4a7dff' : '#10a37f'};
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-  flex-shrink: 0;
+  margin: 0 12px;
 `;
 
 const MessageContent = styled.div`
@@ -68,21 +65,40 @@ const MessageContent = styled.div`
   }
 `;
 
-const ChatMessage = ({ message, isUser }) => {
+const ChatMessage = ({ message, isUser, onWelcomeLinkClick }) => {
+  const messageContent = isUser ? (
+    message
+  ) : (
+    <ReactMarkdown
+      components={{
+        a: ({ node, ...props }) => {
+          if (props.href === '#ssdr-basic' || props.href === '#ssdr-sql') {
+            return <a {...props} onClick={(e) => {
+              e.preventDefault();
+              onWelcomeLinkClick(props.children);
+            }} style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline' }} />;
+          }
+          return <a {...props} target="_blank" rel="noopener noreferrer" />;
+        }
+      }}
+    >
+      {message}
+    </ReactMarkdown>
+  );
+
   return (
-    <MessageContainer>
-      <Avatar isUser={isUser}>
-        {isUser ? 'User' : 'AI'}
-      </Avatar>
-      <MessageContent isUser={isUser}>
-        {isUser ? (
-          message
-        ) : (
-          <ReactMarkdown>
-            {message}
-          </ReactMarkdown>
-        )}
-      </MessageContent>
+    <MessageContainer isUser={isUser}>
+      {isUser ? (
+        <>
+          <MessageContent isUser={isUser}>{messageContent}</MessageContent>
+          <Avatar src={userAvatar} alt="User" />
+        </>
+      ) : (
+        <>
+          <Avatar src={aiAvatar} alt="AI" />
+          <MessageContent isUser={isUser}>{messageContent}</MessageContent>
+        </>
+      )}
     </MessageContainer>
   );
 };
