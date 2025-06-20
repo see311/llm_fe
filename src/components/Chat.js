@@ -89,11 +89,11 @@ const Chat = () => {
     setMessages([initialMessage]);
   }, []);
 
-  const handleWelcomeLinkClick = (href) => {
+  const handleWelcomeLinkClick = (href, text) => {
     const topic = href.substring(1); // 移除 '#' 号
     setSelectedTopic(topic);
 
-    const userMessage = { role: 'user', content: `I want to ask about: ${topic}` };
+    const userMessage = { role: 'user', content: text };
     const aiResponse = { role: 'assistant', content: 'Please ask me related questions?' };
     setMessages(prev => [...prev, userMessage, aiResponse]);
   };
