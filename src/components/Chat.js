@@ -89,14 +89,11 @@ const Chat = () => {
     setMessages([initialMessage]);
   }, []);
 
-  const handleWelcomeLinkClick = (question) => {
-    if (question.includes('basic')) {
-      setSelectedTopic('basic');
-    } else if (question.includes('sql')) {
-      setSelectedTopic('sql');
-    }
+  const handleWelcomeLinkClick = (href) => {
+    const topic = href.substring(1); // 移除 '#' 号
+    setSelectedTopic(topic);
 
-    const userMessage = { role: 'user', content: `I want to ask about: ${question}` };
+    const userMessage = { role: 'user', content: `I want to ask about: ${topic}` };
     const aiResponse = { role: 'assistant', content: 'Please ask me related questions?' };
     setMessages(prev => [...prev, userMessage, aiResponse]);
   };
@@ -120,9 +117,10 @@ const Chat = () => {
     try {
       // 处理流式响应
       let accumulatedResponse = "";
-      const endpoint = selectedTopic === 'basic' 
-        ? '/langchain/api/v1/chat/ollama/stream/v3' 
+      const endpoint = selectedTopic === 'ssdr-basic'
+        ? '/langchain/api/v1/chat/ollama/stream/v3'
         : '/langchain/api/v1/chat/ollama/stream/v2';
+      console.log('Sending message to endpoint:', endpoint);
 
       await sendMessage(
         message, 
