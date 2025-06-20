@@ -117,9 +117,9 @@ const Chat = () => {
     try {
       // 处理流式响应
       let accumulatedResponse = "";
-      const endpoint = selectedTopic === 'ssdr-basic'
-        ? '/langchain/api/v1/chat/ollama/stream/v3'
-        : '/langchain/api/v1/chat/ollama/stream/v2';
+      const endpoint = selectedTopic === 'ssdr-sql'
+        ? '/langchain/api/v1/chat/ollama/stream/v2'
+        : '/langchain/api/v1/chat/ollama/stream/v3';
       console.log('Sending message to endpoint:', endpoint);
 
       await sendMessage(
