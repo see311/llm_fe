@@ -17,12 +17,12 @@ export const generateSessionId = () => {
 };
 
 // 发送消息并接收流式响应 (使用GET请求)
-export const sendMessage = async (message, sessionId, onChunkReceived) => {
+export const sendMessage = async (message, sessionId, endpoint, onChunkReceived) => {
   let receivedLength = 0;
   const controller = new AbortController(); // 创建中断控制器
 
   try {
-    const response = await apiClient.post('/langchain/api/v1/chat/ollama/stream/v2', { message, sessionId }, { ///langchain/api/v1/chat/ollama/stream/v2   /rag/chat/stream/v4
+    const response = await apiClient.post(endpoint, { message, sessionId }, { ///langchain/api/v1/chat/ollama/stream/v2   /rag/chat/stream/v4
       responseType: 'text',
       signal: controller.signal, // 绑定中断信号
       onDownloadProgress: (progressEvent) => {
