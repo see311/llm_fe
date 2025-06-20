@@ -47,6 +47,7 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState('');
+  const [selectedTopic, setSelectedTopic] = useState(''); // 新增状态来跟踪用户选择
   const abortControllerRef = useRef(null); // 添加 AbortController 引用
 
   // 初始化会话ID
@@ -80,6 +81,26 @@ const Chat = () => {
   //   loadChatHistory();
   // }, [sessionId]);
 
+  useEffect(() => {
+    const initialMessage = {
+      role: 'assistant',
+      content: 'Welcome to use SSDR AI assisstant. Please choose the type of knowledge you want to ask me?\n1. [SSDR basic function.](#ssdr-basic)\n2. [Build SQL in SSDR](#ssdr-sql)'
+    };
+    setMessages([initialMessage]);
+  }, []);
+
+  const handleWelcomeLinkClick = (question) => {
+    if (question.includes('basic')) {
+      setSelectedTopic('basic');
+    } else if (question.includes('sql')) {
+      setSelectedTopic('sql');
+    }
+
+    const userMessage = { role: 'user', content: `I want to ask about: ${question}` };
+    const aiResponse = { role: 'assistant', content: 'Please ask me related questions?' };
+    setMessages(prev => [...prev, userMessage, aiResponse]);
+  };
+
   const handleSendMessage = async (message) => {
     if (!sessionId || !message.trim()) return;
 
@@ -99,9 +120,14 @@ const Chat = () => {
     try {
       // 处理流式响应
       let accumulatedResponse = "";
+      const endpoint = selectedTopic === 'basic' 
+        ? '/langchain/api/v1/chat/ollama/stream/v3' 
+        : '/langchain/api/v1/chat/ollama/stream/v2';
+
       await sendMessage(
         message, 
         sessionId, 
+        endpoint,
         (chunk) => {
           // 清理 chunk 数据
         console.log('chunk', chunk);
@@ -174,7 +200,7 @@ const Chat = () => {
       <Header>
         <HeaderTitle>Standard Chartered</HeaderTitle>
       </Header>
-      <ChatHistory messages={messages} onRetry={handleRetryMessage} />
+      <ChatHistory messages={messages} onRetry={handleRetryMessage} onWelcomeLinkClick={handleWelcomeLinkClick} />
       <ChatInput 
         onSendMessage={handleSendMessage} 
         isLoading={isLoading} 
