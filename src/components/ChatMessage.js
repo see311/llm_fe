@@ -70,13 +70,14 @@ const ChatMessage = ({ message, isUser, onWelcomeLinkClick }) => {
     message
   ) : (
     <ReactMarkdown
+      allowDangerousHtml
       components={{
         a: ({ node, ...props }) => {
           if (props.href === '#ssdr-basic' || props.href === '#ssdr-sql') {
             return <a {...props} onClick={(e) => {
               e.preventDefault();
-              onWelcomeLinkClick(props.children);
-            }} style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline' }} />;
+              onWelcomeLinkClick(props.href);
+            }} style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline', display: 'block', marginBottom: '8px' }} />;
           }
           return <a {...props} target="_blank" rel="noopener noreferrer" />;
         }
