@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import ChatMessage from './ChatMessage';
 import styled from 'styled-components';
 import ReactMarkdown from 'react-markdown';
 import { FaRedo } from 'react-icons/fa'; // 导入刷新图标
@@ -151,7 +152,7 @@ const WelcomeSubtitle = styled.p`
   color: #666;
 `;
 
-const ChatHistory = ({ messages, onRetry }) => {
+const ChatHistory = ({ messages, onRetry, onWelcomeLinkClick }) => {
   const endOfMessagesRef = useRef(null);
 
   useEffect(() => {
@@ -174,32 +175,13 @@ const ChatHistory = ({ messages, onRetry }) => {
   return (
     <HistoryContainer>
       {messages.map((msg, index) => (
-        <MessageWrapper key={index} role={msg.role}>
-          {/* 如果是用户消息，并且提供了 onRetry 函数，则显示重试按钮 */}
-          {msg.role === 'user' && onRetry && (
-            <RetryButton onClick={() => onRetry(msg.content)} title="重新提问">
-              <FaRedo />
-            </RetryButton>
-          )}
-          
-          {/* AI头像显示在左侧 */}
-          {msg.role === 'assistant' && (
-            <Avatar role={msg.role}>
-              <img src={aiAvatar} alt="AI" />
-            </Avatar>
-          )}
-          
-          <MessageBubble role={msg.role}>
-            <ReactMarkdown>{msg.content}</ReactMarkdown>
-          </MessageBubble>
-
-          {/* 用户头像显示在右侧 */}
-          {msg.role === 'user' && (
-            <Avatar role={msg.role}>
-              <img src={userAvatar} alt="User" />
-            </Avatar>
-          )}
-        </MessageWrapper>
+        <ChatMessage
+          key={index}
+          message={msg.content}
+          isUser={msg.role === 'user'}
+          onRetry={onRetry} // 传递 onRetry
+          onWelcomeLinkClick={onWelcomeLinkClick}
+        />
       ))}
       {/* 这个空的div用于辅助自动滚动 */}
       <div ref={endOfMessagesRef} />
