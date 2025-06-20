@@ -76,7 +76,7 @@ const ChatMessage = ({ message, isUser, onWelcomeLinkClick }) => {
           if (props.href === '#ssdr-basic' || props.href === '#ssdr-sql') {
             return <a {...props} onClick={(e) => {
               e.preventDefault();
-              onWelcomeLinkClick(props.href);
+              onWelcomeLinkClick(props.href, props.children);
             }} style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline', display: 'block', marginBottom: '8px' }} />;
           }
           return <a {...props} target="_blank" rel="noopener noreferrer" />;
