@@ -22,6 +22,7 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
+  const [activeTab, setActiveTab] = useState('business'); // 新增状态
   const [apiEndpoint, setApiEndpoint] = useState('/langchain/api/v1/chat/ollama/stream/v3'); // 默认v3
   const [showWelcome, setShowWelcome] = useState(true);
   const abortControllerRef = useRef(null); // 添加 AbortController 引用
@@ -61,6 +62,7 @@ const Chat = () => {
 
   const handleWelcomeLinkClick = (href, text, shouldResetView = false, topic) => {
     setSelectedTopic(href.substring(1));
+    setActiveTab(topic); // 设置活动标签
     let endpoint;
     if (topic === 'query') {
       endpoint = '/langchain/api/v1/chat/ollama/stream/v2';
@@ -172,16 +174,39 @@ const Chat = () => {
   };
 
   const handleRefresh = () => {
+    if (isLoading) {
+      abortControllerRef.current?.abort();
+    }
     setMessages([]);
     setShowWelcome(true);
     setSelectedTopic('');
-    // 如果需要，也可以重置其他状态
+    setIsLoading(false);
+  };
+
+  const handleTabChange = (tab) => {
+    if (isLoading) {
+      abortControllerRef.current?.abort();
+      setIsLoading(false);
+    }
+    setActiveTab(tab);
+    setMessages([]);
+    setShowWelcome(true);
+    setSelectedTopic('');
+    const endpoint = tab === 'business' ? '/langchain/api/v1/chat/ollama/stream/v3' : '/langchain/api/v1/chat/ollama/stream/v2';
+    setApiEndpoint(endpoint);
   };
 
   return (
     <ChatContainer>
       <Header title="Standard Chartered" onRefresh={handleRefresh} />
-      <ChatHistory messages={messages} onRetry={handleRetryMessage} onWelcomeLinkClick={handleWelcomeLinkClick} showWelcome={showWelcome} selectedTopic={selectedTopic} />
+      <ChatHistory 
+        messages={messages} 
+        onRetry={handleRetryMessage} 
+        onWelcomeLinkClick={handleWelcomeLinkClick} 
+        showWelcome={showWelcome} 
+        activeTab={activeTab} 
+        onTabChange={handleTabChange} 
+      />
       <ChatInput 
         onSendMessage={handleSendMessage} 
         isLoading={isLoading} 
