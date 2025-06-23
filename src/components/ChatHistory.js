@@ -17,6 +17,22 @@ const HistoryContainer = styled.div`
   background-color: #f7f8fc; /* 聊天区域背景色与整体一致 */
 `;
 
+const TopicHeaderContainer = styled.div`
+  display: flex;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+  width: 100%;
+  justify-content: flex-start; /* 左对齐 */
+`;
+
+const TopicHeader = styled.div`
+  padding: 10px 20px;
+  color: #4a7dff;
+  border-bottom: 2px solid #4a7dff;
+  margin-bottom: -2px; /* 与父元素的border-bottom重合 */
+  font-weight: 600;
+`;
+
 const MessageWrapper = styled.div`
   display: flex;
   margin-bottom: 15px;
@@ -132,35 +148,65 @@ const RetryButton = styled.button`
 
 
 
-const ChatHistory = ({ messages, onRetry, onWelcomeLinkClick, onFeedback, showWelcome, selectedTopic }) => {
+const TabsContainer = styled.div`
+  display: flex;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+  width: 100%;
+  justify-content: flex-start; /* 左对齐 */
+`;
+
+const Tab = styled.div`
+  padding: 10px 20px;
+  cursor: pointer;
+  color: ${props => (props.isActive ? '#4a7dff' : '#666')};
+  border-bottom: 2px solid ${props => (props.isActive ? '#4a7dff' : 'transparent')};
+  margin-bottom: -2px; /* 与父元素的border-bottom重合 */
+  font-weight: ${props => (props.isActive ? '600' : '500')};
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: #4a7dff;
+  }
+`;
+
+const ChatHistory = ({ messages, onRetry, onWelcomeLinkClick, showWelcome, activeTab, onTabChange }) => {
   const endOfMessagesRef = useRef(null);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // 如果没有消息，则显示欢迎语
-  if (showWelcome) {
-    return (
-      <HistoryContainer>
-        <Welcome onWelcomeLinkClick={onWelcomeLinkClick} selectedTopic={selectedTopic} />
-        <div ref={endOfMessagesRef} />
-      </HistoryContainer>
-    );
-  }
+  const handleTabClick = (tab) => {
+    if (onTabChange) {
+      onTabChange(tab);
+    }
+  };
 
   return (
     <HistoryContainer>
-      {messages.map((msg, index) => (
-        <ChatMessage
-          key={index}
-          message={msg.content}
-          isUser={msg.role === 'user'}
-          onRetry={onRetry} // 传递 onRetry
-          onWelcomeLinkClick={onWelcomeLinkClick}
-        />
-      ))}
-      {/* 这个空的div用于辅助自动滚动 */}
+      <TabsContainer>
+        <Tab isActive={activeTab === 'business'} onClick={() => handleTabClick('business')}>
+          SSDR Business
+        </Tab>
+        <Tab isActive={activeTab === 'query'} onClick={() => handleTabClick('query')}>
+          SSDR Query
+        </Tab>
+      </TabsContainer>
+
+      {showWelcome ? (
+        <Welcome onWelcomeLinkClick={onWelcomeLinkClick} activeTab={activeTab} onTabChange={onTabChange} />
+      ) : (
+        messages.map((msg, index) => (
+          <ChatMessage
+            key={index}
+            message={msg.content}
+            isUser={msg.role === 'user'}
+            onRetry={onRetry}
+            onWelcomeLinkClick={onWelcomeLinkClick}
+          />
+        ))
+      )}
       <div ref={endOfMessagesRef} />
     </HistoryContainer>
   );
