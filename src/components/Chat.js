@@ -101,7 +101,7 @@ const Chat = () => {
       console.log('Sending message to endpoint:', endpoint);
 
       await sendMessage(
-        message, 
+        text, 
         sessionId, 
         endpoint,
         (chunk) => {
@@ -171,9 +171,16 @@ const Chat = () => {
     await handleSendMessage(messageContent);
   };
 
+  const handleRefresh = () => {
+    setMessages([]);
+    setShowWelcome(true);
+    setSelectedTopic('');
+    // 如果需要，也可以重置其他状态
+  };
+
   return (
     <ChatContainer>
-      <Header title="Standard Chartered" onRefresh={() => window.location.reload()} />
+      <Header title="Standard Chartered" onRefresh={handleRefresh} />
       <ChatHistory messages={messages} onRetry={handleRetryMessage} onWelcomeLinkClick={handleWelcomeLinkClick} showWelcome={showWelcome} selectedTopic={selectedTopic} />
       <ChatInput 
         onSendMessage={handleSendMessage} 
