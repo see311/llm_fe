@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import ChatMessage from './ChatMessage';
+import Welcome from './Welcome';
 import styled from 'styled-components';
 import ReactMarkdown from 'react-markdown';
 import { FaRedo } from 'react-icons/fa'; // 导入刷新图标
@@ -129,30 +130,9 @@ const RetryButton = styled.button`
   }
 `;
 
-const WelcomeMessageContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: #555;
-  padding: 40px 20px;
-  flex-grow: 1; /* 占据剩余空间 */
-`;
 
-const WelcomeTitle = styled.h2`
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #333;
-`;
 
-const WelcomeSubtitle = styled.p`
-  font-size: 16px;
-  color: #666;
-`;
-
-const ChatHistory = ({ messages, onRetry, onWelcomeLinkClick }) => {
+const ChatHistory = ({ messages, onRetry, onWelcomeLinkClick, onFeedback, showWelcome, selectedTopic }) => {
   const endOfMessagesRef = useRef(null);
 
   useEffect(() => {
@@ -160,13 +140,10 @@ const ChatHistory = ({ messages, onRetry, onWelcomeLinkClick }) => {
   }, [messages]);
 
   // 如果没有消息，则显示欢迎语
-  if (messages.length === 0) {
+  if (showWelcome) {
     return (
       <HistoryContainer>
-        <WelcomeMessageContainer>
-          <WelcomeTitle>Your Personal AI Assistant</WelcomeTitle>
-          <WelcomeSubtitle>Ask Me Anything.</WelcomeSubtitle>
-        </WelcomeMessageContainer>
+        <Welcome onWelcomeLinkClick={onWelcomeLinkClick} selectedTopic={selectedTopic} />
         <div ref={endOfMessagesRef} />
       </HistoryContainer>
     );
