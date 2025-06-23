@@ -2,10 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import ChatHistory from './ChatHistory'; // 确保路径正确
 import ChatInput from './ChatInput';
+import Header from './Header'; // 导入新的 Header 组件
 import { sendMessage, getChatHistory, generateSessionId } from '../services/api';
 import ReactMarkdown from 'react-markdown';
-// 移除 logo 导入
-// import logo from '../assets/standard-chartered-logo.png';
 
 const ChatContainer = styled.div`
   display: flex;
@@ -18,36 +17,13 @@ const ChatContainer = styled.div`
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; /* 更现代的字体 */
 `;
 
-const Header = styled.div`
-  padding: 0 20px; /* 恢复左右内边距 */
-  background: linear-gradient(to right, #009efd, #2af598);
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  /* 移除 justify-content: space-between; 因为现在只有一个元素 */
-  height: 60px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border-bottom: 1px solid #e0e0e0;
-`;
-
-// 移除 SCLogo 组件
-
-// 移除 LogoContainer 组件
-
-// 移除 TextContainer 组件
-
-const HeaderTitle = styled.span`
-  /* 标题文字样式 */
-  font-size: 22px; /* 增大字体大小，从18px改为22px */
-`;
-
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState('');
-  const [selectedTopic, setSelectedTopic] = useState(''); // 新增状态来跟踪用户选择
+  const [selectedTopic, setSelectedTopic] = useState('');
+  const [apiEndpoint, setApiEndpoint] = useState('/langchain/api/v1/chat/ollama/stream/v3'); // 默认v3
+  const [showWelcome, setShowWelcome] = useState(true);
   const abortControllerRef = useRef(null); // 添加 AbortController 引用
 
   // 初始化会话ID
@@ -81,29 +57,33 @@ const Chat = () => {
   //   loadChatHistory();
   // }, [sessionId]);
 
-  useEffect(() => {
-    const initialMessage = {
-      role: 'assistant',
-      content: 'Welcome to use SSDR AI assisstant. Please choose the type of knowledge you want to ask me?\n1. [SSDR basic function.](#ssdr-basic)\n2. [Build SQL in SSDR](#ssdr-sql)'
-    };
-    setMessages([initialMessage]);
-  }, []);
 
-  const handleWelcomeLinkClick = (href, text) => {
-    const topic = href.substring(1); // 移除 '#' 号
-    setSelectedTopic(topic);
 
-    const userMessage = { role: 'user', content: text };
-    const aiResponse = { role: 'assistant', content: 'Please ask me related questions?' };
-    setMessages(prev => [...prev, userMessage, aiResponse]);
+  const handleWelcomeLinkClick = (href, text, shouldResetView = false, topic) => {
+    setSelectedTopic(href.substring(1));
+    let endpoint;
+    if (topic === 'query') {
+      endpoint = '/langchain/api/v1/chat/ollama/stream/v2';
+    } else {
+      endpoint = '/langchain/api/v1/chat/ollama/stream/v3';
+    }
+    setApiEndpoint(endpoint);
+    handleSendMessage(text, shouldResetView, endpoint);
   };
 
-  const handleSendMessage = async (message) => {
-    if (!sessionId || !message.trim()) return;
+  const handleSendMessage = async (text, shouldResetView = false, endpointOverride = null) => {
+    setShowWelcome(false);
+    if (!sessionId || !text.trim()) return;
 
-    // 添加用户消息到聊天历史
-    const userMessage = { role: 'user', content: message };
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage = { role: 'user', content: text };
+
+    setMessages(prev => {
+      // 如果这是第一条用户消息，则替换掉初始的欢迎消息
+      if (prev.length === 1 && prev[0].role === 'assistant') {
+        return [userMessage];
+      }
+      return [...prev, userMessage];
+    });
 
     // 创建一个空的 AI 响应消息
     const aiMessagePlaceholder = { role: 'assistant', content: '' };
@@ -117,9 +97,7 @@ const Chat = () => {
     try {
       // 处理流式响应
       let accumulatedResponse = "";
-      const endpoint = selectedTopic === 'ssdr-sql'
-        ? '/langchain/api/v1/chat/ollama/stream/v2'
-        : '/langchain/api/v1/chat/ollama/stream/v3';
+      const endpoint = endpointOverride || apiEndpoint;
       console.log('Sending message to endpoint:', endpoint);
 
       await sendMessage(
@@ -195,10 +173,8 @@ const Chat = () => {
 
   return (
     <ChatContainer>
-      <Header>
-        <HeaderTitle>Standard Chartered</HeaderTitle>
-      </Header>
-      <ChatHistory messages={messages} onRetry={handleRetryMessage} onWelcomeLinkClick={handleWelcomeLinkClick} />
+      <Header title="Standard Chartered" onRefresh={() => window.location.reload()} />
+      <ChatHistory messages={messages} onRetry={handleRetryMessage} onWelcomeLinkClick={handleWelcomeLinkClick} showWelcome={showWelcome} selectedTopic={selectedTopic} />
       <ChatInput 
         onSendMessage={handleSendMessage} 
         isLoading={isLoading} 
