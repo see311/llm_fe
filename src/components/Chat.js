@@ -9,8 +9,8 @@ import ReactMarkdown from 'react-markdown';
 const ChatContainer = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  max-width: 1000px; /* 可以根据需要调整最大宽度 */
+  height: 700px;
+  width: 1000px; /* 可以根据需要调整最大宽度 */
   margin: 0 auto;
   background-color: #f7f8fc; /* 整体背景色，类似图片中的浅灰色 */
   color: #333; /* 默认文字颜色 */
@@ -198,7 +198,7 @@ const Chat = () => {
 
   return (
     <ChatContainer>
-      <Header title="Standard Chartered" onRefresh={handleRefresh} />
+      <Header title="Conversation with SSDR Chatbot" onRefresh={handleRefresh} />
       <ChatHistory 
         messages={messages} 
         onRetry={handleRetryMessage} 
