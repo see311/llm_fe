@@ -159,6 +159,7 @@ const TabsContainer = styled.div`
 const Tab = styled.div`
   padding: 10px 20px;
   cursor: pointer;
+  font-size: 17px;
   color: ${props => (props.isActive ? '#4a7dff' : '#666')};
   border-bottom: 2px solid ${props => (props.isActive ? '#4a7dff' : 'transparent')};
   margin-bottom: -2px; /* 与父元素的border-bottom重合 */
@@ -186,11 +187,11 @@ const ChatHistory = ({ messages, onRetry, onWelcomeLinkClick, showWelcome, activ
   return (
     <HistoryContainer>
       <TabsContainer>
-        <Tab isActive={activeTab === 'business'} onClick={() => handleTabClick('business')}>
-          SSDR Business
-        </Tab>
-        <Tab isActive={activeTab === 'query'} onClick={() => handleTabClick('query')}>
+      <Tab isActive={activeTab === 'query'} onClick={() => handleTabClick('query')}>
           SSDR Query
+        </Tab>
+        <Tab isActive={activeTab === 'business'} onClick={() => handleTabClick('business')}>
+          SSDR Knowledge
         </Tab>
       </TabsContainer>
 
