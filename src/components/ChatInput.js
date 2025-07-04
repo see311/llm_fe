@@ -154,11 +154,11 @@ const ChatInput = ({ onSendMessage, isLoading, onStopGeneration }) => {
             Submit
         </SendButton> */}
       </InputContainer>
-      <ExamplesContainer>
+      {/* <ExamplesContainer>
         <ExampleButton onClick={() => handleExampleClick('Hello')}>Hello</ExampleButton>
         <ExampleButton onClick={() => handleExampleClick('Who are you?')}>Who are you?</ExampleButton>
         <ExampleButton onClick={() => handleExampleClick('What is SSDR?')}>What is SSDR?</ExampleButton>
-      </ExamplesContainer>
+      </ExamplesContainer> */}
     </>
   );
 };
