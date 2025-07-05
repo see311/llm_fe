@@ -62,27 +62,23 @@ const Welcome = ({ onWelcomeLinkClick, activeTab }) => {
 
   const welcomeOptions = {
     'business': [
-      { href: '#question-1', text: 'What are my total fails?' },
-      { href: '#question-2', text: 'What is exposure to Firm TEST COMPANY falling to settle open transactions including repos?' },
-      { href: '#question-3', text: 'What are my Open Exceptions for Equity Trades today?' },
-      { href: '#question-4', text: 'Give me a list of all Open SWIFT Verification from IPE.' },
-      { href: '#question-5', text: 'What are my depot realignment opportunities for IBM?' },
-      { href: '#question-6', text: 'How many unmatched Transactions we have today?' },
-      { href: '#question-7', text: 'What\'s the projected positions for security US45920014 across depots as of 06/29/2023?' },
-      { href: '#question-8', text: 'What will be my position at DTC #229 if the trade X123 is not settled today?' },
-      { href: '#question-9', text: 'What is my Total Margin Call Value and explain margin call and drivers.' },
-    ],
-    'query': [
-      { href: '#question-10', text: 'Generate a SQL query to find all users in the \'sales\' department.' },
-      { href: '#question-11', text: 'Create a SQL statement to get the top 5 products by sales amount.' },
-      { href: '#question-12', text: 'Write a SQL query to list all employees hired in the last year.' },
-      { href: '#question-13', text: 'Provide a SQL query to calculate the average salary for each department.' },
-      { href: '#question-14', text: 'Generate a SQL statement to find duplicate emails in the customers table.' },
-      { href: '#question-15', text: 'Write a SQL query to get the total number of orders for each customer.' },
-      { href: '#question-16', text: 'Create a SQL query to find all products with a stock level below 10.' },
-      { href: '#question-17', text: 'Generate a SQL statement to get the monthly sales report for the current year.' },
-      { href: '#question-18', text: 'Write a SQL query to find the names of all employees who are also managers.' },
-    ]
+        { href: '#question-1', text: 'What is SSDR?' },
+        { href: '#question-2', text: 'what kind of data is onboarded in SSDR?' },
+        { href: '#question-3', text: 'What approval is required for my scheduler report in SSDR?' },
+        { href: '#question-4', text: 'Where I can find my scheduled report in SSDR?' },
+        { href: '#question-5', text: 'How to build a query in SSDR?' },
+        { href: '#question-6', text: 'How to run query and extract result in SSDR?' },
+        { href: '#question-7', text: 'How to save & load queries for future reuse in SSDR?' },
+        { href: '#question-8', text: 'What is UDF in SSDR?' },
+        { href: '#question-9', text: 'How to use Query Helper in SSDR?' },
+      ],
+      'query': [
+        { href: '#question-10', text: 'How to query recent 30 days Murex live status trade ?' },
+        { href: '#question-11', text: 'How to query all live trade against counterparty QNBFINANSYA/IST?' },
+        { href: '#question-12', text: 'How to query recent 3 days Murex live status trade data?' },
+        { href: '#question-14', text: 'How to query recent 3 days Commodity Asset Class trade?' },
+        { href: '#question-15', text: 'How to query recent 3 days Credit Asset Class trades?' }
+      ]
   };
 
   const handleWelcomeLinkClick = (href, text) => {
