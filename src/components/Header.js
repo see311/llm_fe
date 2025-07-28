@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useNavigate } from "react-router-dom";
+import { publish } from "src/lib/MassageCenter/messageCenter";
 
 const HeaderContainer = styled.div`
   padding: 0 20px;
@@ -7,25 +9,25 @@ const HeaderContainer = styled.div`
   color: #ffffff;
   font-size: 18px;
   font-weight: 600;
+  flex: none;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 将元素分布在两端 */
-  height: 60px;
+  justify-content: space-between;
+  height: 40px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border-bottom: 1px solid #e0e0e0;
 `;
 
 const HeaderTitle = styled.span`
-  /* 标题文字样式 */
-  font-size: 22px; /* 增大字体大小，从18px改为22px */
+  font-size: 18px;
 `;
 
 const RefreshButton = styled.button`
   background-color: transparent;
   border: 1px solid #ffffff;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
   display: flex;
   align-items: center;
