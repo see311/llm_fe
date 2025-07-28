@@ -22,14 +22,13 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
-  const [activeTab, setActiveTab] = useState('business'); // 新增状态
-  const [apiEndpoint, setApiEndpoint] = useState('/langchain/api/v1/chat/ollama/stream/v3'); // 默认v3
+  const [activeTab, setActiveTab] = useState('query');
+  const [apiEndpoint, setApiEndpoint] = useState('/langchain/api/v1/chat/ollama/stream/v3');
   const [showWelcome, setShowWelcome] = useState(true);
-  const abortControllerRef = useRef(null); // 添加 AbortController 引用
+  const abortControllerRef = useRef(null);
+  const [inputMessage, setInputMessage] = useState('');
 
-  // 初始化会话ID
   useEffect(() => {
-    // 从localStorage获取现有的sessionId，如果没有则生成一个新的
     const existingSessionId = localStorage.getItem('chatSessionId');
     if (existingSessionId) {
       setSessionId(existingSessionId);
@@ -40,7 +39,7 @@ const Chat = () => {
     }
   }, []);
 
-  // 加载聊天历史
+  // load chat history
   // useEffect(() => {
   //   if (!sessionId) return;
 
@@ -60,9 +59,9 @@ const Chat = () => {
 
 
 
-  const handleWelcomeLinkClick = (href, text, shouldResetView = false, topic) => {
+  const handleWelcomeLinkClick = (href, text, topic) => {
     setSelectedTopic(href.substring(1));
-    setActiveTab(topic); // 设置活动标签
+    setActiveTab(topic);
     let endpoint;
     if (topic === 'query') {
       endpoint = '/langchain/api/v1/chat/ollama/stream/v2';
@@ -70,62 +69,51 @@ const Chat = () => {
       endpoint = '/langchain/api/v1/chat/ollama/stream/v3';
     }
     setApiEndpoint(endpoint);
-    handleSendMessage(text, shouldResetView, endpoint);
+    setInputMessage(text)
   };
 
-  const handleSendMessage = async (text, shouldResetView = false, endpointOverride = null) => {
+  const handleSendMessage = async (text, endpointOverride = null) => {
     setShowWelcome(false);
     if (!sessionId || !text.trim()) return;
 
     const userMessage = { role: 'user', content: text };
 
     setMessages(prev => {
-      // 如果这是第一条用户消息，则替换掉初始的欢迎消息
       if (prev.length === 1 && prev[0].role === 'assistant') {
         return [userMessage];
       }
       return [...prev, userMessage];
     });
 
-    // 创建一个空的 AI 响应消息
     const aiMessagePlaceholder = { role: 'assistant', content: '' };
     setMessages(prev => [...prev, aiMessagePlaceholder]);
 
     setIsLoading(true);
-    
-    // 创建新的 AbortController
+
     abortControllerRef.current = new AbortController();
 
     try {
-      // 处理流式响应
       let accumulatedResponse = "";
       const endpoint = endpointOverride || apiEndpoint;
       console.log('Sending message to endpoint:', endpoint);
 
       await sendMessage(
-        text, 
-        sessionId, 
+        text,
+        sessionId,
         endpoint,
         (chunk) => {
-          // 清理 chunk 数据
-        console.log('chunk', chunk);
-        const cleanedChunk = chunk.replace(/data:/g, '').replace(/\n\n/g, '');
-        if (cleanedChunk === '[DONE]') { // 检查流结束标记
-          return;
-        }
+          console.log('chunk', chunk);
+          const cleanedChunk = chunk.replace(/data:/g, '').replace(/\n\n/g, '');
+          if (cleanedChunk === '[DONE]') {
+            return;
+          }
           if (cleanedChunk) {
             try {
-              // 尝试解析JSON，如果后端发送的是JSON对象
-              //const parsedChunk = JSON.parse(chunk);
-              //accumulatedResponse += parsedChunk.text || parsedChunk.content || '';
-	      // 如果后端直接发送文本片段：
               accumulatedResponse += cleanedChunk;
             } catch (e) {
-              // 如果不是JSON，直接累加文本
               accumulatedResponse += cleanedChunk;
             }
-            
-            // 更新消息显示
+
             setMessages(prev => {
               const newMessages = [...prev];
               if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
@@ -135,11 +123,10 @@ const Chat = () => {
             });
           }
         },
-        abortControllerRef.current.signal // 传递中断信号
+        abortControllerRef.current
       );
     } catch (error) {
       console.error('Error in chat:', error);
-      // 在消息中显示错误
       setMessages(prev => {
         const newMessages = [...prev];
         if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
@@ -149,16 +136,14 @@ const Chat = () => {
       });
     } finally {
       setIsLoading(false);
-      abortControllerRef.current = null; // 清除引用
+      abortControllerRef.current = null;
     }
   };
 
-  // 添加停止生成的处理函数
   const handleStopGeneration = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       setIsLoading(false);
-      // 移除最后一条AI的空白消息
       setMessages(prev => {
         if (prev.length > 0 && prev[prev.length - 1].role === 'assistant' && prev[prev.length - 1].content === '') {
           return prev.slice(0, -1);
@@ -169,7 +154,6 @@ const Chat = () => {
   };
 
   const handleRetryMessage = async (messageContent) => {
-    // 直接调用 handleSendMessage 来重新发送消息
     await handleSendMessage(messageContent);
   };
 
@@ -198,19 +182,21 @@ const Chat = () => {
 
   return (
     <ChatContainer>
-      <Header title="Conversation with SSDR Chatbot" onRefresh={handleRefresh} />
-      <ChatHistory 
-        messages={messages} 
-        onRetry={handleRetryMessage} 
-        onWelcomeLinkClick={handleWelcomeLinkClick} 
-        showWelcome={showWelcome} 
-        activeTab={activeTab} 
-        onTabChange={handleTabChange} 
+      <Header title="Conversation with AI Chatbot" onRefresh={handleRefresh} />
+      <ChatHistory
+        messages={messages}
+        onRetry={handleRetryMessage}
+        onWelcomeLinkClick={handleWelcomeLinkClick}
+        showWelcome={showWelcome}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
       />
-      <ChatInput 
-        onSendMessage={handleSendMessage} 
-        isLoading={isLoading} 
-        onStopGeneration={handleStopGeneration} // 添加停止生成的回调
+      <ChatInput
+        onSendMessage={handleSendMessage}
+        isLoading={isLoading}
+        onStopGeneration={handleStopGeneration}
+        setInputMessage={setInputMessage}
+        inputMessage={inputMessage}
       />
     </ChatContainer>
   );
