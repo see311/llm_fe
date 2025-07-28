@@ -5,7 +5,7 @@ const WelcomeContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* 从顶部开始对齐 */
+  justify-content: flex-start;
   flex-grow: 1;
   padding: 40px 20px;
   width: 100%;
@@ -16,7 +16,7 @@ const Tabs = styled.div`
   margin-bottom: 30px;
   border-bottom: 2px solid #e0e0e0;
   width: 100%;
-  justify-content: flex-start; /* 左对齐 */
+  justify-content: flex-start;
 `;
 
 const Tab = styled.div`
@@ -24,7 +24,7 @@ const Tab = styled.div`
   cursor: pointer;
   color: ${props => (props.active ? '#4a7dff' : '#666')};
   border-bottom: ${props => (props.active ? '2px solid #4a7dff' : 'none')};
-  margin-bottom: -2px; /* 与父元素的border-bottom重合 */
+  margin-bottom: -2px;
   font-weight: 600;
 `;
 
@@ -45,11 +45,11 @@ const QuestionCard = styled.div`
   transition: all 0.3s ease;
   font-size: 15px;
   color: #333;
-  height: 120px; /* 固定高度 */
+  height: 120px;
   display: flex;
-  align-items: center; /* 垂直居中 */
-  justify-content: center; /* 水平居中 */
-  text-align: left; /* 文本左对齐 */
+  align-items: center;
+  justify-content: center;
+  text-align: left;
 
   &:hover {
     border-color: #4a7dff;
@@ -62,28 +62,28 @@ const Welcome = ({ onWelcomeLinkClick, activeTab }) => {
 
   const welcomeOptions = {
     'business': [
-        { href: '#question-1', text: 'What is SSDR?' },
-        { href: '#question-2', text: 'what kind of data is onboarded in SSDR?' },
-        { href: '#question-3', text: 'What approval is required for my scheduler report in SSDR?' },
-        { href: '#question-4', text: 'Where I can find my scheduled report in SSDR?' },
-        { href: '#question-5', text: 'How to build a query in SSDR?' },
-        { href: '#question-6', text: 'How to run query and extract result in SSDR?' },
-        { href: '#question-7', text: 'How to save & load queries for future reuse in SSDR?' },
-        { href: '#question-8', text: 'What is UDF in SSDR?' },
-        { href: '#question-9', text: 'How to use Query Helper in SSDR?' },
-      ],
-      'query': [
-        { href: '#question-10', text: 'How to query recent 30 days Murex live status trade ?' },
-        { href: '#question-11', text: 'How to query all live trade against counterparty QNBFINANSYA/IST?' },
-        { href: '#question-12', text: 'How to query recent 3 days Murex live status trade data?' },
-        { href: '#question-14', text: 'How to query recent 3 days Commodity Asset Class trade?' },
-        { href: '#question-15', text: 'How to query recent 3 days Credit Asset Class trades?' }
-      ]
+      { href: '#question-1', text: 'What is SSDR?' },
+      { href: '#question-2', text: 'what kind of data is onboarded in SSDR?' },
+      { href: '#question-3', text: 'What approval is required for my scheduler report in SSDR?' },
+      { href: '#question-4', text: 'Where I can find my scheduled report in SSDR?' },
+      { href: '#question-5', text: 'How to build a query in SSDR?' },
+      { href: '#question-6', text: 'How to run query and extract result in SSDR?' },
+      { href: '#question-7', text: 'How to save & load queries for future reuse in SSDR?' },
+      { href: '#question-8', text: 'What is UDF in SSDR?' },
+      { href: '#question-9', text: 'How to use Query Helper in SSDR?' },
+    ],
+    'query': [
+      { href: '#question-10', text: 'How to query recent 30 days live status trade?' },
+      { href: '#question-11', text: 'How to query all live trade against counterparty CITI/LDN?' },
+      { href: '#question-12', text: 'Please give me all the Live trades belongs to Singapore entity.' },
+      { href: '#question-14', text: 'How to query all the live trades booked in portfolio PB_EQ_DBUS_CLIENT' },
+      { href: '#question-16', text: 'How to get all the trade events for trade 481817492?' }
+    ]
   };
 
   const handleWelcomeLinkClick = (href, text) => {
     const topic = activeTab; // 'business' or 'query'
-    onWelcomeLinkClick(href, text, false, topic);
+    onWelcomeLinkClick(href, text, topic);
   };
 
   return (
