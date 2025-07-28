@@ -1,8 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import ReactMarkdown from 'react-markdown';
+import CustomCodeBlock from './CustomCodeBlock.tsx'
 import aiAvatar from '../assets/ai-avatar.png';
 import userAvatar from '../assets/user-avatar.png';
+import remarkGfm from 'remark-gfm'
 
 const MessageContainer = styled.div`
   display: flex;
@@ -23,8 +25,7 @@ const MessageContent = styled.div`
   border-radius: 8px;
   max-width: 80%;
   white-space: pre-wrap;
-  
-  /* Markdown样式 */
+
   & pre {
     background-color: #f1f1f1;
     padding: 10px;
@@ -70,7 +71,7 @@ const ChatMessage = ({ message, isUser, onWelcomeLinkClick }) => {
     message
   ) : (
     <ReactMarkdown
-      allowDangerousHtml
+      remarkPlugins={[remarkGfm]}
       components={{
         a: ({ node, ...props }) => {
           if (props.href === '#ssdr-basic' || props.href === '#ssdr-sql') {
@@ -80,7 +81,8 @@ const ChatMessage = ({ message, isUser, onWelcomeLinkClick }) => {
             }} style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline', display: 'block', marginBottom: '8px' }} />;
           }
           return <a {...props} target="_blank" rel="noopener noreferrer" />;
-        }
+        },
+        code: CustomCodeBlock
       }}
     >
       {message}
